@@ -1,0 +1,16 @@
+{
+    "courses": [
+        {
+            "name": "Barista Course",
+            "description": "Barista Course Description"
+        },
+        {
+            "name": "Coffee Course",
+            "description": "Coffee Course Description"
+        },
+        {
+            "name": "Bakery Course",
+            "description": "Bakery Course Description"
+        }
+    ]
+}
