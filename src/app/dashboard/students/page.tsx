@@ -80,69 +80,71 @@ export default function StudentsPage() {
       <Separator />
 
       {/* Recently Added */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Recently Added Students</h3>
-        <div className="border rounded-lg p-4 space-y-2">
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">Recently Added Students</h3>
+        <div className="border rounded-lg p-6 space-y-4 bg-white shadow-sm">
           {students.length > 0 ? (
             students
               .slice(-5)
               .reverse()
               .map((student, i) => {
-                const isMale = student.gender?.toLowerCase() === "male";
-                // Default avatars (you can replace URLs with your own images)
-                const avatarUrl = isMale
-                  ? "/avatars/male-avatar.png"
-                  : "/avatars/female-avatar.png";
+                const avatarUrl = (() => {
+                  if (!student.gender) return "/avatars/neutral-avatar.jpg"; // no gender specified
+                  const genderLower = student.gender.toLowerCase();
+                  if (genderLower === "male") return "/avatars/male-avatar.jpg";
+                  if (genderLower === "female")
+                    return "/avatars/female-avatar.jpg";
+                  return "/avatars/neutral-avatar.jpg"; // for other genders
+                })();
 
                 return (
                   <div
                     key={i}
-                    className="flex items-center justify-between p-2 border rounded"
+                    className="flex items-center justify-between p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
                     {/* Avatar */}
                     <img
                       src={avatarUrl}
                       alt={`${student.name} avatar`}
-                      className="w-12 h-12 rounded-full object-cover mr-4"
+                      className="w-14 h-14 rounded-full border-2 border-indigo-500 object-cover mr-6"
                     />
 
                     {/* Student info */}
                     <div className="flex-grow">
-                      <p className="font-medium">{student.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {student.email} — {student.shift}
+                      <p className="font-semibold text-lg text-gray-900">
+                        {student.name}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        {student.phone}
+                      <p className="text-sm text-gray-600">
+                        {student.email} &mdash;{" "}
+                        <span className="italic">{student.shift}</span>
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        {student.address}
-                      </p>
-                      <p className="text-sm text-muted-foreground font-semibold mt-1">
+                      <p className="text-sm text-gray-600">{student.phone}</p>
+                      <p className="text-sm text-gray-600">{student.address}</p>
+                      <p className="text-sm font-semibold mt-1 text-indigo-600">
                         Gender: {student.gender || "Not specified"}
                       </p>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex space-x-2">
-                      <Button
+                    <div className="flex space-x-3">
+                      <button
                         onClick={() => handleEdit(student)}
-                        className="text-blue-600 hover:underline"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       >
                         Edit
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => handleDelete(student.id)}
-                        className="text-red-600 hover:underline"
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
                       >
                         Delete
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 );
               })
           ) : (
-            <p className="text-muted-foreground">No recent students yet.</p>
+            <p className="text-gray-500 italic">No recent students yet.</p>
           )}
         </div>
       </div>
