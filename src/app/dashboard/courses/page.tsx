@@ -34,14 +34,8 @@ const CoursesPage = () => {
     duration: "",
     price: "",
   });
-  const [editForm, setEditForm] = useState({
-    id: "",
-    name: "",
-    description: "",
-    duration: "",
-    price: "",
-  });
-  const [isEditing, setIsEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // <-- added state
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -50,18 +44,29 @@ const CoursesPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data, error } = await supabase
-      .from("courses")
-      .insert([formData])
-      .select();
-    if (error) return console.error("Error:", error);
-    setCourses((prev) => [...prev, ...data]);
-    setFormData({
-      name: "",
-      description: "",
-      duration: "",
-      price: "",
-    });
+
+    if (isSubmitting) return; // prevent multiple submits
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("courses")
+        .insert([formData])
+        .select();
+
+      if (error) return console.error("Error:", error);
+
+      setCourses((prev) => [...prev, ...data]);
+
+      setFormData({
+        name: "",
+        description: "",
+        duration: "",
+        price: "",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = async (courseId: string) => {
@@ -141,7 +146,9 @@ const CoursesPage = () => {
               />
 
               <DialogFooter>
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
