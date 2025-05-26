@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -13,6 +13,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase/supabase";
+import { CardListItem } from "@/components/CardListItem";
+import { EditCourseDialog } from "./EditCourseDialog";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState<any[]>([]);
@@ -22,14 +34,26 @@ const CoursesPage = () => {
     duration: "",
     price: "",
   });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const [editForm, setEditForm] = useState({
+    id: "",
+    name: "",
+    description: "",
+    duration: "",
+    price: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data, error } = await supabase.from("courses").insert([formData]).select();
+    const { data, error } = await supabase
+      .from("courses")
+      .insert([formData])
+      .select();
     if (error) return console.error("Error:", error);
     setCourses((prev) => [...prev, ...data]);
     setFormData({
@@ -39,6 +63,33 @@ const CoursesPage = () => {
       price: "",
     });
   };
+
+  const handleDelete = async (courseId: string) => {
+    const confirmed = confirm("Are you sure you want to delete this course?");
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("courses")
+      .update({ is_deleted: true })
+      .eq("id", courseId);
+
+    if (error) return console.error("Delete Error:", error);
+    fetchCourses();
+  };
+
+  const fetchCourses = async () => {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("is_deleted", false); // only fetch visible records
+
+    if (error) return console.error("Error:", error);
+    setCourses(data);
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   return (
     <div className="p-4 space-y-6">
@@ -114,7 +165,7 @@ const CoursesPage = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Popular Course</p>
-            <p className="text-2xl font-bold">Frontend Bootcamp</p>
+            <p className="text-2xl font-bold">Coffee Barista</p>
           </CardContent>
         </Card>
       </div>
@@ -124,15 +175,35 @@ const CoursesPage = () => {
       {/* Recently Added Courses */}
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Recently Added Courses</h3>
-        <div className="border rounded-lg p-4 space-y-2">
+        <div className="border rounded-lg p-6 space-y-4 bg-white shadow-sm">
           {courses.length > 0 ? (
-            courses.slice(-5).map((course, i) => (
-              <div key={i}>
-                <p className="font-medium">{course.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {course.duration} — Rs. {course.price}
-                </p>
-              </div>
+            courses.slice(0, 5).map((course) => (
+              <CardListItem
+                key={course.id}
+                title={course.name}
+                subtitle={`Duration: ${course.duration} — Rs. ${course.price}`}
+              >
+                <EditCourseDialog course={course} onUpdated={fetchCourses} />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Delete</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(course.id)}
+                        className="bg-red-600 text-white hover:bg-red-700"
+                      >
+                        Confirm Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </CardListItem>
             ))
           ) : (
             <p className="text-muted-foreground">No recent courses yet.</p>

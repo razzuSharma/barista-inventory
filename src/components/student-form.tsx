@@ -94,7 +94,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
+      <div className="space-y-2">
         <Label>Name</Label>
         <Input
           value={name}
@@ -103,7 +103,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         />
       </div>
 
-      <div>
+      <div className="space-y-2">
         <Label>Email</Label>
         <Input
           type="email"
@@ -113,7 +113,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         />
       </div>
 
-      <div>
+      <div className="space-y-2">
         <Label>Address</Label>
         <Input
           value={address}
@@ -122,7 +122,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         />
       </div>
 
-      <div>
+      <div className="space-y-2">
         <Label>Phone</Label>
         <Input
           value={phone}
@@ -131,7 +131,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         />
       </div>
 
-      <div>
+      <div className="space-y-2">
         <Label>Gender</Label>
         <Select onValueChange={setGender} value={gender}>
           <SelectTrigger className="w-full rounded-md border border-input px-3 py-2 text-sm">
@@ -145,7 +145,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         </Select>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-2">
         <Label htmlFor="shift">Shift</Label>
         <Select onValueChange={setShift} value={shift}>
           <SelectTrigger className="w-full rounded-md border border-input px-3 py-2 text-sm">
@@ -159,7 +159,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         </Select>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-2">
         <Label htmlFor="courses">Enrolled Courses</Label>
         <MultiSelect
           options={availableCourses.map((c) => ({
@@ -169,7 +169,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
           selected={courses}
           onChange={setCourses}
           placeholder="Select one or more courses"
-          className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+          className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background "
         />
       </div>
 

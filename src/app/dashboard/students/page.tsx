@@ -12,23 +12,41 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import StudentForm from "@/components/student-form";
+import { CardListItem } from "@/components/CardListItem";
+import { IconSearch } from "@tabler/icons-react";
+import EditStudentsDialog from "./EditStudentsDialog";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<any | null>(null);
+
+  const filteredStudents = students.filter((student) =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const fetchStudents = async () => {
-    const { data, error } = await supabase.from("students").select("*");
-    if (error) console.error("Error fetching students:", error);
-    else setStudents(data);
+    const { data, error } = await supabase
+      .from("students")
+      .select("*")
+      .eq("deleted", false);
+
+    if (error) return console.error("Fetch error", error);
+    setStudents(data);
   };
 
-  const handleEdit = (student: any) => {
-    console.log(student);
-  };
-
-  const handleDelete = (studentId: string) => {
-    console.log(studentId);
+  const handleConfirmDelete = async () => {
+    if (!studentToDelete) return;
+    const { error } = await supabase
+      .from("students")
+      .update({ deleted: true }) // soft delete
+      .eq("id", studentToDelete.id);
+    if (error) return console.error("Delete error", error);
+    setDeleteDialogOpen(false);
+    setStudentToDelete(null);
+    fetchStudents();
   };
 
   useEffect(() => {
@@ -81,70 +99,62 @@ export default function StudentsPage() {
 
       {/* Recently Added */}
       <div className="space-y-4">
+        <div className="relative w-full max-w-md mx-auto mb-4">
+          <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-2 pl-10 border rounded-md"
+          />
+        </div>
+
         <h3 className="text-xl font-semibold">Recently Added Students</h3>
         <div className="border rounded-lg p-6 space-y-4 bg-white shadow-sm">
-          {students.length > 0 ? (
-            students
+          {filteredStudents.length > 0 ? (
+            filteredStudents
               .slice(-5)
               .reverse()
-              .map((student, i) => {
+              .map((student) => {
                 const avatarUrl = (() => {
-                  if (!student.gender) return "/avatars/neutral-avatar.jpg"; // no gender specified
+                  if (!student.gender) return "/avatars/neutral-avatar.jpg";
                   const genderLower = student.gender.toLowerCase();
                   if (genderLower === "male") return "/avatars/male-avatar.jpg";
                   if (genderLower === "female")
                     return "/avatars/female-avatar.jpg";
-                  return "/avatars/neutral-avatar.jpg"; // for other genders
+                  return "/avatars/neutral-avatar.jpg";
                 })();
 
                 return (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                  <CardListItem
+                    key={student.id}
+                    avatarUrl={avatarUrl}
+                    title={student.name}
+                    subtitle={`${student.email} — ${student.shift}`}
+                    extraInfo={`Gender: ${student.gender || "Not specified"}`}
                   >
-                    {/* Avatar */}
-                    <img
-                      src={avatarUrl}
-                      alt={`${student.name} avatar`}
-                      className="w-14 h-14 rounded-full border-2 border-indigo-500 object-cover mr-6"
-                    />
-
-                    {/* Student info */}
-                    <div className="flex-grow">
-                      <p className="font-semibold text-lg text-gray-900">
-                        {student.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {student.email} &mdash;{" "}
-                        <span className="italic">{student.shift}</span>
-                      </p>
-                      <p className="text-sm text-gray-600">{student.phone}</p>
-                      <p className="text-sm text-gray-600">{student.address}</p>
-                      <p className="text-sm font-semibold mt-1 text-indigo-600">
-                        Gender: {student.gender || "Not specified"}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => handleEdit(student)}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(student.id)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
+                    <div className="flex gap-2">
+                      <EditStudentsDialog
+                        student={student}
+                        onUpdated={fetchStudents}
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setStudentToDelete(student);
+                          setDeleteDialogOpen(true);
+                        }}
                       >
                         Delete
-                      </button>
+                      </Button>
                     </div>
-                  </div>
+                  </CardListItem>
                 );
               })
           ) : (
-            <p className="text-gray-500 italic">No recent students yet.</p>
+            <p className="text-muted-foreground">No recent students yet.</p>
           )}
         </div>
       </div>
