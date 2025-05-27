@@ -36,8 +36,10 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const { data, error } = await supabase.from("courses").select("id, name");
-
+      const { data, error } = await supabase
+        .from("courses")
+        .select("id, name")
+        .eq("is_deleted", false);
       if (error) {
         console.error("Error fetching courses:", error);
       } else {

@@ -70,8 +70,6 @@ const CoursesPage = () => {
   };
 
   const handleDelete = async (courseId: string) => {
-    const confirmed = confirm("Are you sure you want to delete this course?");
-    if (!confirmed) return;
 
     const { error } = await supabase
       .from("courses")
