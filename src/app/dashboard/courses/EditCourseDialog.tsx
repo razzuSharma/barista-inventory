@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   Dialog,
   DialogContent,
@@ -6,30 +6,54 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase/supabase';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase/supabase";
 
-export function EditCourseDialog({ course, onUpdated }: { course: any, onUpdated: () => void }) {
+export function EditCourseDialog({
+  course,
+  onUpdated,
+}: {
+  course: any;
+  onUpdated: () => void;
+}) {
   const [form, setForm] = useState(course);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { id, ...rest } = form;
-    const { error } = await supabase.from('courses').update(rest).eq('id', id);
-    if (error) return console.error("Update error", error);
-    onUpdated();
+    if (isSubmitting) return; // Prevent multiple submits
+    setIsSubmitting(true);
+
+    try {
+      const { id, ...rest } = form;
+      const { error } = await supabase
+        .from("courses")
+        .update(rest)
+        .eq("id", id);
+      if (error) {
+        console.error("Update error", error);
+        return;
+      }
+      onUpdated();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Edit</Button>
+        <Button variant="outline" size="sm">
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -67,7 +91,9 @@ export function EditCourseDialog({ course, onUpdated }: { course: any, onUpdated
             className="w-full p-2 border rounded"
           />
           <DialogFooter>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

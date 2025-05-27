@@ -58,7 +58,7 @@ const data = {
     },
     {
       title: "Finance",
-      url: "#",
+      url: "/dashboard/finance",
       icon: IconMoneybag,
     },
     
