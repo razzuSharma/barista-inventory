@@ -34,7 +34,6 @@ export default function StudentsPage() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState<any | null>(null);
 
   const filteredStudents = students.filter((student) =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -49,7 +48,8 @@ export default function StudentsPage() {
         enrollments (
           course: courses (
             id,
-            name
+            name,
+            duration
           )
         )
       `

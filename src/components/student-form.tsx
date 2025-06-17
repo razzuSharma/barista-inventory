@@ -30,14 +30,19 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
   const [phone, setPhone] = useState("");
   const [shift, setShift] = useState("");
   const [gender, setGender] = useState("");
+  const [parentsName, setParentsName] = useState("");
+  const [parentsPhone, setParentsPhone] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
   const [courses, setCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const { data, error } = await supabase.from("courses").select("id, name");
-
+      const { data, error } = await supabase
+        .from("courses")
+        .select("id, name")
+        .eq("is_deleted", false);
       if (error) {
         console.error("Error fetching courses:", error);
       } else {
@@ -57,7 +62,19 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
       // Insert the student
       const { data: studentData, error: studentError } = await supabase
         .from("students")
-        .insert([{ name, email, address, phone, shift, gender }])
+        .insert([
+          {
+            name,
+            email,
+            address,
+            phone,
+            shift,
+            gender,
+            parentsName,
+            parentsPhone,
+            educationLevel,
+          },
+        ])
         .select()
         .single();
 
@@ -93,6 +110,9 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
       setPhone("");
       setShift("");
       setGender("");
+      setParentsName("");
+      setParentsPhone("");
+      setEducationLevel("");
       setCourses([]);
 
       onSubmit(); // Notify parent
@@ -136,6 +156,33 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         <Input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Parent's Name</Label>
+        <Input
+          value={parentsName}
+          onChange={(e) => setParentsName(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Parent's Phone</Label>
+        <Input
+          value={parentsPhone}
+          onChange={(e) => setParentsPhone(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Education Level</Label>
+        <Input
+          value={educationLevel}
+          onChange={(e) => setEducationLevel(e.target.value)}
           required
         />
       </div>
