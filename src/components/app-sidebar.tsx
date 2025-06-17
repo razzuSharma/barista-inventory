@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import {
   IconCamera,
@@ -17,8 +16,7 @@ import {
   IconCoffee,
   IconMan,
   IconMoneybag,
-  IconBook
-  
+  IconBook,
 } from "@tabler/icons-react";
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
@@ -61,8 +59,11 @@ const data = {
       url: "/dashboard/finance",
       icon: IconMoneybag,
     },
-    
-   
+    {
+      title: "Expenses",
+      url: "/dashboard/expenses",
+      icon: IconReport,
+    },
   ],
   navClouds: [
     {
