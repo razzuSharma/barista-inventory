@@ -7,7 +7,7 @@ interface CardListItemProps {
   avatarUrl?: string
   title: string
   subtitle?: string
-  extraInfo?: string
+  extraInfo?: ReactNode
   children?: ReactNode
 }
 
