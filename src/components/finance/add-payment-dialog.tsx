@@ -29,16 +29,15 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
   const [amount, setAmount] = useState("");
   const [payment_method, setPayment_method] = useState("");
   const [payment_date, setPaymentDate] = useState("");
+  const [discount, setDiscount] = useState("");
   const [remarks, setRemarks] = useState("");
   const [enrollmentId, setEnrollmentId] = useState("");
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchEnrollments = async () => {
-    const { data, error } = await supabase
-      .from("enrollments")
-      .select(
-        `
+    const { data, error } = await supabase.from("enrollments").select(
+      `
         id,
         student_id,
         course_id,
@@ -51,7 +50,7 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
           name
         )
       `
-      )
+    );
     console.log("first", data);
 
     if (!error && data) {
@@ -86,6 +85,7 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
     const { error } = await supabase.from("payments").insert({
       enrollment_id: enrollmentId,
       amount: parseFloat(amount),
+      discount: discount ? parseFloat(discount) : 0,
       payment_method: payment_method,
       payment_date: payment_date,
       remarks,
@@ -98,6 +98,7 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
       // Reset fields
       setAmount("");
       setPayment_method("");
+      setDiscount(""); 
       setPaymentDate("");
       setRemarks("");
       setEnrollmentId("");
@@ -141,6 +142,16 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Discount</Label>
+            <Input
+              type="number"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+              placeholder="Enter discount (if any)"
             />
           </div>
 

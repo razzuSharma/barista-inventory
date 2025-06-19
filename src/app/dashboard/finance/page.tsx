@@ -1,9 +1,17 @@
-// app/dashboard/finance/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/supabase";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  fetchPayments,
+  softDeletePayment,
+  calculateTotals,
+} from "@/lib/supabase/financeHelpers";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { PaymentsChart } from "@/components/finance/payments-chart";
 import { PaymentsTable } from "@/components/finance/payments-table";
 import { AddPaymentDialog } from "@/components/finance/add-payment-dialog";
@@ -14,39 +22,22 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [editingPayment, setEditingPayment] = useState<any | null>(null);
 
-  const fetchPayments = async () => {
-    const { data, error } = await supabase
-      .from("payments")
-      .select(
-        `
-    *,
-    enrollment:enrollments (
-      id,
-      student:students (id, name),
-      course:courses (id, name)
-    )
-  `
-      )
-      .order("payment_date", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching payments:", error);
-    } else {
-      setPayments(data);
+  const loadPayments = async () => {
+    try {
+      const data = await fetchPayments();
+      setPayments(data || []);
+    } catch (err) {
+      console.error(err);
     }
-    if (!error && data) setPayments(data);
   };
 
   useEffect(() => {
-    fetchPayments();
+    loadPayments();
   }, []);
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("payments")
-      .update({ deleted: true })
-      .eq("id", id);
-    if (!error) fetchPayments();
+    await softDeletePayment(id);
+    loadPayments();
   };
 
   const handleEdit = (payment: any) => {
@@ -55,16 +46,16 @@ export default function PaymentsPage() {
 
   const handleEditSave = () => {
     setEditingPayment(null);
-    fetchPayments();
+    loadPayments();
   };
 
-  const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+  const { totalReceived, fullyPaidCount, totalDue } = calculateTotals(payments);
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Incoming Fees</h1>
-        <AddPaymentDialog onPaymentAdded={fetchPayments} />
+        <AddPaymentDialog onPaymentAdded={loadPayments} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -73,7 +64,7 @@ export default function PaymentsPage() {
             <CardTitle>Total Received</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
-            ₹{totalAmount.toLocaleString()}
+            ₹{totalReceived.toLocaleString()}
           </CardContent>
         </Card>
         <Card>
@@ -81,7 +72,7 @@ export default function PaymentsPage() {
             <CardTitle>Total Due</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
-            {/* ₹{totalAmount.toLocaleString()} */}₹1200
+            ₹{totalDue.toLocaleString()}
           </CardContent>
         </Card>
         <Card>
@@ -90,7 +81,7 @@ export default function PaymentsPage() {
           </CardHeader>
           <CardContent className="text-2xl font-bold flex">
             <IconMan />
-            <p className="px-2">5</p>
+            <p className="px-2">{fullyPaidCount}</p>
           </CardContent>
         </Card>
       </div>
