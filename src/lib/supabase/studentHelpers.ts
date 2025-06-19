@@ -9,6 +9,7 @@ export interface Course {
 
 export interface Payment {
   amount: number;
+  discount?: number | null;
 }
 
 export interface Enrollment {
@@ -46,7 +47,7 @@ export const fetchStudentsWithPayments = async (): Promise<Student[]> => {
       enrollments (
         id,
         course: courses ( id, name, duration, price ), 
-        payments: payments!fk_enrollments ( amount )
+        payments: payments!fk_enrollments ( amount, discount )
       )
     `
     )
@@ -63,19 +64,25 @@ export const fetchStudentsWithPayments = async (): Promise<Student[]> => {
   return students.map((student) => {
     const enrollments = student.enrollments || [];
 
-    // Sum total paid for all enrollments
     const totalPaid = enrollments.reduce((sum, enrollment) => {
       const enrollmentPayments = enrollment.payments || [];
       return (
-        sum +
-        enrollmentPayments.reduce((acc, payment) => acc + Number(payment.amount), 0)
+        sum + enrollmentPayments.reduce((acc, p) => acc + Number(p.amount), 0)
       );
     }, 0);
 
-    // Sum total fees from courses' price (use price, not duration)
-    const totalFees = enrollments.reduce((sum, enrollment) => {
+    // Total course price
+    const rawFees = enrollments.reduce((sum, enrollment) => {
       return sum + (enrollment.course?.price ?? 0);
     }, 0);
+
+    // Total discount
+    const totalDiscount = enrollments.reduce((sum, enrollment) => {
+      const payments = enrollment.payments || [];
+      return sum + payments.reduce((acc, p) => acc + (p.discount ?? 0), 0);
+    }, 0);
+
+    const totalFees = rawFees - totalDiscount;
 
     let status: Student["paymentStatus"] = "Paid";
     if (totalPaid === 0) status = "Due";
