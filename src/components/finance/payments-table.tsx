@@ -43,7 +43,9 @@ export function PaymentsTable({
               <TableCell>{index + 1}</TableCell>
               <TableCell>{p.enrollment?.student?.name || "Unknown"}</TableCell>
               <TableCell>{p.enrollment?.course?.name || "Unknown"}</TableCell>
-              <TableCell>{format(new Date(p.payment_date), "dd MMM yyyy")}</TableCell>
+              <TableCell>
+                {format(new Date(p.payment_date), "dd MMM yyyy")}
+              </TableCell>
               <TableCell>₹{p.amount}</TableCell>
               <TableCell>{p.payment_method}</TableCell>
               <TableCell>{p.remarks || "-"}</TableCell>
@@ -51,7 +53,11 @@ export function PaymentsTable({
                 <Button variant="outline" size="sm" onClick={() => onEdit?.(p)}>
                   <Pencil className="w-4 h-4" />
                 </Button>
-                <Button variant="destructive" size="sm" onClick={() => onDelete?.(p.id)}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete?.(p.id)}
+                >
                   <Trash className="w-4 h-4" />
                 </Button>
               </TableCell>

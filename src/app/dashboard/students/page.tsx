@@ -7,7 +7,7 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
-  DialogHeader,
+  DialogHeader, 
   DialogTitle,
 } from "@/components/ui/dialog";
 import StudentForm from "@/components/student-form";

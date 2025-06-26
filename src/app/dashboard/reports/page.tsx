@@ -21,7 +21,7 @@ export default function ReportSection() {
 
   return (
     <div className="p-6 space-y-4 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold">Generate Payment Report</h2>
+      <h2 className="text-xl font-semibold">Generate Closing Balance Report</h2>
 
       <div className="flex flex-col sm:flex-row gap-4 items-center">
         <Input
