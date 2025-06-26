@@ -31,7 +31,6 @@ export interface Student {
   deleted?: boolean;
   enrollments?: Enrollment[];
 
-  // Calculated properties:
   courses?: Course[];
   totalPaid?: number;
   totalFees?: number;

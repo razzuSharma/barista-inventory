@@ -14,7 +14,7 @@ import StudentForm from "@/components/student-form";
 import { PaymentStatsCards } from "@/components/students/PaymentStatsCards";
 import { StudentsFilters } from "@/components/students/StudentsFilters";
 import { StudentsList } from "@/components/students/StudentsList";
-import { useStudentsData } from "@/hooks/useStudentsDatag";
+import { useStudentsData } from "@/hooks/useStudentsData";
 
 type PaymentStatus = "Paid" | "Due" | "Partial";
 
