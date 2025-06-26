@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState, SetStateAction } from "react";
+
+import { useState } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -19,120 +20,138 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/lib/supabase/supabase";
+import { useEnrollments, useCreatePayment } from "@/lib/queries/paymentQueries";
+import { EnrollmentData } from "@/lib/repositories/enrollmentsRepository";
+import { Plus } from "lucide-react";
 
-interface AddPaymentDialogProps {
-  onPaymentAdded: () => void;
-}
-
-export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
+export function AddPaymentDialog() {
   const [amount, setAmount] = useState("");
-  const [payment_method, setPayment_method] = useState("");
-  const [payment_date, setPaymentDate] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentDate, setPaymentDate] = useState("");
   const [discount, setDiscount] = useState("");
   const [remarks, setRemarks] = useState("");
   const [enrollmentId, setEnrollmentId] = useState("");
-  const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const fetchEnrollments = async () => {
-    const { data, error } = await supabase.from("enrollments").select(
-      `
-        id,
-        student_id,
-        course_id,
-        students (
-          id,
-          name
-        ),
-        courses (
-          id,
-          name
-        )
-      `
-    );
-    console.log("first", data);
+  // TanStack Query hooks
+  const {
+    data: enrollments = [],
+    isLoading: isLoadingEnrollments,
+    refetch: refetchEnrollments,
+  } = useEnrollments();
+  const createPaymentMutation = useCreatePayment();
 
-    if (!error && data) {
-      setEnrollments(data);
+  const validateForm = (): string | null => {
+    if (!enrollmentId) {
+      return "Please select an enrollment";
+    }
+    if (!paymentMethod) {
+      return "Please select a payment method";
+    }
+    if (!paymentDate) {
+      return "Please select the payment date";
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+      return "Please enter a valid amount";
+    }
+    return null;
+  };
+
+  const resetForm = () => {
+    setAmount("");
+    setPaymentMethod("");
+    setDiscount("");
+    setPaymentDate("");
+    setRemarks("");
+    setEnrollmentId("");
+  };
+
+  const handleSubmit = async () => {
+    const validationError = validateForm();
+    if (validationError) {
+      alert(validationError); // In production, use a proper toast/notification
+      return;
+    }
+
+    try {
+      await createPaymentMutation.mutateAsync({
+        enrollment_id: enrollmentId,
+        amount: parseFloat(amount),
+        discount: discount ? parseFloat(discount) : 0,
+        payment_method: paymentMethod,
+        payment_date: paymentDate,
+        remarks: remarks || "",
+      });
+
+      // Success - reset form and close dialog
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to create payment:", error);
+      // In production, show a proper error toast
+      alert(
+        error instanceof Error ? error.message : "Failed to create payment"
+      );
     }
   };
 
-  useEffect(() => {
-    fetchEnrollments();
-  }, []);
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
 
-  const handleSubmit = async () => {
-    if (!enrollmentId) {
-      alert("Please select an enrollment");
-      return;
-    }
-    if (!payment_method) {
-      alert("Please select a payment method");
-      return;
-    }
-    if (!payment_date) {
-      alert("Please select the payment date");
-      return;
-    }
-    if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid amount");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const { error } = await supabase.from("payments").insert({
-      enrollment_id: enrollmentId,
-      amount: parseFloat(amount),
-      discount: discount ? parseFloat(discount) : 0,
-      payment_method: payment_method,
-      payment_date: payment_date,
-      remarks,
-    });
-
-    setIsSubmitting(false);
-
-    if (!error) {
-      onPaymentAdded(); // Refresh data in parent
-      // Reset fields
-      setAmount("");
-      setPayment_method("");
-      setDiscount(""); 
-      setPaymentDate("");
-      setRemarks("");
-      setEnrollmentId("");
+    if (open) {
+      refetchEnrollments(); 
+    } else {
+      resetForm();
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
       <DialogTrigger asChild>
-        <Button>Add Payment</Button>
+        <Button>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Payment
+        </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Payment</DialogTitle>
         </DialogHeader>
+
+        {createPaymentMutation.error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-red-600 text-sm">
+              {createPaymentMutation.error instanceof Error
+                ? createPaymentMutation.error.message
+                : "Failed to create payment"}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Student & Course</Label>
-            <Select
-              value={enrollmentId}
-              onValueChange={setEnrollmentId}
-              defaultValue=""
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select student & course" />
-              </SelectTrigger>
-              <SelectContent>
-                {enrollments.map((enrollment) => (
-                  <SelectItem key={enrollment.id} value={enrollment.id}>
-                    {enrollment.students?.name} - {enrollment.courses?.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isLoadingEnrollments ? (
+              <div className="flex items-center justify-center p-4">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                <span className="ml-2 text-sm text-gray-600">
+                  Loading enrollments...
+                </span>
+              </div>
+            ) : (
+              <Select value={enrollmentId} onValueChange={setEnrollmentId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select student & course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {enrollments.map((enrollment: EnrollmentData) => (
+                    <SelectItem key={enrollment.id} value={enrollment.id}>
+                      {enrollment.students?.name} - {enrollment.courses?.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -142,6 +161,8 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
+              min="0"
+              step="0.01"
             />
           </div>
 
@@ -152,23 +173,21 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
               value={discount}
               onChange={(e) => setDiscount(e.target.value)}
               placeholder="Enter discount (if any)"
+              min="0"
+              step="0.01"
             />
           </div>
 
           <div className="space-y-2">
             <Label>Payment Method</Label>
-            <Select
-              value={payment_method}
-              onValueChange={setPayment_method}
-              defaultValue=""
-            >
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger>
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CASH">CASH</SelectItem>
-                <SelectItem value="ESEWA">ESEWA</SelectItem>
-                <SelectItem value="BANKING">BANKING</SelectItem>
+                <SelectItem value="CASH">Cash</SelectItem>
+                <SelectItem value="ESEWA">eSewa</SelectItem>
+                <SelectItem value="BANKING">Banking</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -177,7 +196,7 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
             <Label>Paid On</Label>
             <Input
               type="date"
-              value={payment_date}
+              value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
             />
           </div>
@@ -186,16 +205,33 @@ export function AddPaymentDialog({ onPaymentAdded }: AddPaymentDialogProps) {
             <Label>Remarks</Label>
             <Textarea
               value={remarks}
-              onChange={(e: { target: { value: SetStateAction<string> } }) =>
-                setRemarks(e.target.value)
-              }
+              onChange={(e) => setRemarks(e.target.value)}
               placeholder="Optional remarks"
+              rows={3}
             />
           </div>
         </div>
+
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Payment"}
+          <Button
+            variant="outline"
+            onClick={() => setIsDialogOpen(false)}
+            disabled={createPaymentMutation.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={createPaymentMutation.isPending || isLoadingEnrollments}
+          >
+            {createPaymentMutation.isPending ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Saving...
+              </>
+            ) : (
+              "Save Payment"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

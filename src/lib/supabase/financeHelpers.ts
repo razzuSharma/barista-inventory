@@ -1,4 +1,3 @@
-// lib/supabase/financeHelpers.ts
 
 import { supabase } from "./supabase";
 

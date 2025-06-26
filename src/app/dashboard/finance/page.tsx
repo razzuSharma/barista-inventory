@@ -1,61 +1,103 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  fetchPayments,
-  softDeletePayment,
-  calculateTotals,
-} from "@/lib/supabase/financeHelpers";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  usePayments,
+  usePaymentTotals,
+  useDeletePayment,
+} from "@/lib/queries/paymentQueries";
+import { PaymentData } from "@/lib/repositories/paymentRepository";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PaymentsChart } from "@/components/finance/payments-chart";
 import { PaymentsTable } from "@/components/finance/payments-table";
 import { AddPaymentDialog } from "@/components/finance/add-payment-dialog";
 import { EditPaymentDialog } from "@/components/finance/edit-payment-dialog";
 import { IconMan } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<any[]>([]);
-  const [editingPayment, setEditingPayment] = useState<any | null>(null);
+  const [editingPayment, setEditingPayment] = useState<PaymentData | null>(
+    null
+  );
 
-  const loadPayments = async () => {
-    try {
-      const data = await fetchPayments();
-      setPayments(data || []);
-    } catch (err) {
-      console.error(err);
+  // TanStack Query hooks
+  const {
+    data: payments = [],
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = usePayments();
+
+  const {
+    data: totals = { totalReceived: 0, fullyPaidCount: 0, totalDue: 0 },
+    isLoading: totalsLoading,
+  } = usePaymentTotals();
+
+  const deletePaymentMutation = useDeletePayment();
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this payment?")) {
+      try {
+        await deletePaymentMutation.mutateAsync(id);
+      } catch (error) {
+        console.error("Failed to delete payment:", error);
+        // You could add a toast notification here
+      }
     }
   };
 
-  useEffect(() => {
-    loadPayments();
-  }, []);
-
-  const handleDelete = async (id: string) => {
-    await softDeletePayment(id);
-    loadPayments();
-  };
-
-  const handleEdit = (payment: any) => {
+  const handleEdit = (payment: PaymentData) => {
     setEditingPayment(payment);
   };
 
-  const handleEditSave = () => {
+  const handleEditClose = () => {
     setEditingPayment(null);
-    loadPayments();
   };
 
-  const { totalReceived, fullyPaidCount, totalDue } = calculateTotals(payments);
+  const handleRefresh = () => {
+    refetch();
+  };
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-6">
+          <h2 className="text-red-800 font-semibold text-lg mb-2">
+            Error Loading Payments
+          </h2>
+          <p className="text-red-600 mb-4">
+            {error instanceof Error ? error.message : "Failed to load payments"}
+          </p>
+          <Button onClick={handleRefresh} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Incoming Fees</h1>
-        <AddPaymentDialog onPaymentAdded={loadPayments} />
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-semibold">Incoming Fees</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isFetching}
+          >
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${isFetching ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+        </div>
+        <AddPaymentDialog />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -64,41 +106,75 @@ export default function PaymentsPage() {
             <CardTitle>Total Received</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
-            ₹{totalReceived.toLocaleString()}
+            {totalsLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+            ) : (
+              `₹${totals.totalReceived.toLocaleString()}`
+            )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Total Due</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
-            ₹{totalDue.toLocaleString()}
+            {totalsLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+            ) : (
+              `₹${totals.totalDue.toLocaleString()}`
+            )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Total Cleared</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold flex">
+          <CardContent className="text-2xl font-bold flex items-center">
             <IconMan />
-            <p className="px-2">{fullyPaidCount}</p>
+            {totalsLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-16 rounded ml-2"></div>
+            ) : (
+              <p className="px-2">{totals.fullyPaidCount}</p>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      <PaymentsChart payments={payments} />
-      <PaymentsTable
-        payments={payments}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {isLoading ? (
+        <div className="space-y-6">
+          {/* Loading skeleton for chart */}
+          <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>
+
+          {/* Loading skeleton for table */}
+          <div className="animate-pulse space-y-4">
+            <div className="bg-gray-200 h-12 rounded"></div>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-gray-100 h-16 rounded"></div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
+          <PaymentsChart payments={payments} />
+          <PaymentsTable
+            payments={payments}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </>
+      )}
 
       {editingPayment && (
-        <EditPaymentDialog
-          payment={editingPayment}
-          onClose={() => setEditingPayment(null)}
-          onSave={handleEditSave}
-        />
+        <EditPaymentDialog payment={editingPayment} onClose={handleEditClose} />
+      )}
+
+      {/* Background refresh indicator */}
+      {isFetching && !isLoading && (
+        <div className="fixed top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+          Refreshing...
+        </div>
       )}
     </div>
   );
