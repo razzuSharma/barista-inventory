@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { ReactNode } from "react"
-import Image from "next/image"
+import { ReactNode } from "react";
+import Image from "next/image";
 
 interface CardListItemProps {
-  avatarUrl?: string
-  title: string
-  subtitle?: string
-  extraInfo?: ReactNode
-  children?: ReactNode
+  avatarUrl?: string;
+  title: string;
+  subtitle?: string;
+  extraInfo?: ReactNode;
+  children?: ReactNode;
 }
 
 export function CardListItem({
@@ -32,22 +32,20 @@ export function CardListItem({
           />
         )}
         <div>
-          <p className="font-semibold text-lg text-gray-900">{title}</p>
+          <h2 className="font-semibold text-lg text-gray-900">{title}</h2>
           {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
           {extraInfo && (
-            <p className="text-sm font-semibold text-purple-600">
+            <span className="text-sm font-semibold text-purple-600">
               {extraInfo}
-            </p>
+            </span>
           )}
         </div>
       </div>
 
       {/* Right: Buttons */}
       {children && (
-        <div className="flex items-center space-x-2">
-          {children}
-        </div>
+        <div className="flex items-center space-x-2">{children}</div>
       )}
     </div>
-  )
+  );
 }
