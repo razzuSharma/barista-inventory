@@ -6,9 +6,7 @@ import {
   UpdatePaymentData,
   PaymentData,
 } from "@/lib/repositories/paymentRepository";
-import { EnrollmentData } from "@/lib/repositories/enrollmentsRepository";
 
-// Query Keys
 export const paymentsKeys = {
   all: ["payments"] as const,
   lists: () => [...paymentsKeys.all, "list"] as const,
@@ -29,13 +27,12 @@ export const enrollmentsKeys = {
 
 const paymentsService = new PaymentsService();
 
-// Queries
 export const usePayments = () => {
   return useQuery({
     queryKey: paymentsKeys.lists(),
     queryFn: () => paymentsService.getAllPayments(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes (previously cacheTime)
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
 };
 
@@ -52,8 +49,8 @@ export const useEnrollments = () => {
   return useQuery({
     queryKey: enrollmentsKeys.lists(),
     queryFn: () => paymentsService.getAllEnrollments(),
-    staleTime: 1000 * 60 * 10, // 10 minutes (enrollments change less frequently)
-    gcTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 60,
   });
 };
 
@@ -65,15 +62,12 @@ export const useCreatePayment = () => {
     mutationFn: (data: CreatePaymentData) =>
       paymentsService.createPayment(data),
     onMutate: async (newPayment) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: paymentsKeys.lists() });
 
-      // Snapshot the previous value
       const previousPayments = queryClient.getQueryData<PaymentData[]>(
         paymentsKeys.lists()
       );
 
-      // Optimistically update to the new value
       if (previousPayments) {
         const optimisticPayment: PaymentData = {
           id: `temp-${Date.now()}`,
@@ -98,7 +92,6 @@ export const useCreatePayment = () => {
       return { previousPayments };
     },
     onError: (err, newPayment, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousPayments) {
         queryClient.setQueryData(
           paymentsKeys.lists(),
@@ -107,7 +100,6 @@ export const useCreatePayment = () => {
       }
     },
     onSettled: () => {
-      // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: paymentsKeys.lists() });
     },
   });
@@ -120,11 +112,9 @@ export const useUpdatePayment = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdatePaymentData }) =>
       paymentsService.updatePayment(id, data),
     onMutate: async ({ id, data }) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: paymentsKeys.lists() });
       await queryClient.cancelQueries({ queryKey: paymentsKeys.detail(id) });
 
-      // Snapshot the previous values
       const previousPayments = queryClient.getQueryData<PaymentData[]>(
         paymentsKeys.lists()
       );
@@ -132,7 +122,6 @@ export const useUpdatePayment = () => {
         paymentsKeys.detail(id)
       );
 
-      // Optimistically update the payments list
       if (previousPayments) {
         const updatedPayments = previousPayments.map((payment) =>
           payment.id === id ? { ...payment, ...data } : payment
@@ -143,7 +132,6 @@ export const useUpdatePayment = () => {
         );
       }
 
-      // Optimistically update the individual payment
       if (previousPayment) {
         queryClient.setQueryData<PaymentData>(paymentsKeys.detail(id), {
           ...previousPayment,
@@ -154,7 +142,6 @@ export const useUpdatePayment = () => {
       return { previousPayments, previousPayment };
     },
     onError: (err, { id }, context) => {
-      // Rollback on error
       if (context?.previousPayments) {
         queryClient.setQueryData(
           paymentsKeys.lists(),
@@ -169,7 +156,6 @@ export const useUpdatePayment = () => {
       }
     },
     onSettled: (data, error, { id }) => {
-      // Refetch to ensure we have the latest data
       queryClient.invalidateQueries({ queryKey: paymentsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: paymentsKeys.detail(id) });
     },
@@ -182,15 +168,12 @@ export const useDeletePayment = () => {
   return useMutation({
     mutationFn: (id: string) => paymentsService.deletePayment(id),
     onMutate: async (id) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: paymentsKeys.lists() });
 
-      // Snapshot the previous value
       const previousPayments = queryClient.getQueryData<PaymentData[]>(
         paymentsKeys.lists()
       );
 
-      // Optimistically remove the payment
       if (previousPayments) {
         const updatedPayments = previousPayments.filter(
           (payment) => payment.id !== id
@@ -204,7 +187,6 @@ export const useDeletePayment = () => {
       return { previousPayments };
     },
     onError: (err, id, context) => {
-      // Rollback on error
       if (context?.previousPayments) {
         queryClient.setQueryData(
           paymentsKeys.lists(),
@@ -213,13 +195,11 @@ export const useDeletePayment = () => {
       }
     },
     onSettled: () => {
-      // Refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: paymentsKeys.lists() });
     },
   });
 };
 
-// Custom hook for payment totals with memoization
 export const usePaymentTotals = () => {
   const { data: payments = [] } = usePayments();
 
@@ -227,6 +207,6 @@ export const usePaymentTotals = () => {
     queryKey: [...paymentsKeys.lists(), "totals"],
     queryFn: () => paymentsService.calculateTotals(payments),
     enabled: payments.length > 0,
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 2,
   });
 };
