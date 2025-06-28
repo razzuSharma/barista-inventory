@@ -42,8 +42,8 @@ export default function ReportSection() {
       {report && (
         <div className="mt-6 space-y-2 border-t pt-4">
           <h3 className="text-lg font-semibold">Report Summary:</h3>
-          <p>Total Received: ₹{report.total_received.toLocaleString()}</p>
-          <p>Total Discount: ₹{report.total_discount.toLocaleString()}</p>
+          <p>Total Received: ₹{report.total_received.toFixed(2)}</p>
+          <p>Total Discount: ₹{report.total_discount.toFixed(2)}</p>
           <p>Total Transactions: {report.total_transactions}</p>
 
           <div className="mt-4">
@@ -51,8 +51,8 @@ export default function ReportSection() {
             <ul className="text-sm list-disc list-inside">
               {report.payments.map((p: any, index: number) => (
                 <li key={index}>
-                  ₹{p.amount} on {p.payment_date}{" "}
-                  {p.discount ? `(Discount: ₹${p.discount})` : ""}
+                  ₹{p.amount.toFixed(2)} on {p.payment_date}{" "}
+                  {p.discount ? `(Discount: ₹${p.discount.toFixed(2)})` : ""}
                 </li>
               ))}
             </ul>

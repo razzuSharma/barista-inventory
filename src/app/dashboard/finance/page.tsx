@@ -109,7 +109,7 @@ export default function PaymentsPage() {
             {totalsLoading ? (
               <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
             ) : (
-              `₹${totals.totalReceived.toLocaleString()}`
+              `₹${totals.totalReceived.toFixed(2)}`
             )}
           </CardContent>
         </Card>
@@ -122,7 +122,7 @@ export default function PaymentsPage() {
             {totalsLoading ? (
               <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
             ) : (
-              `₹${totals.totalDue.toLocaleString()}`
+              `₹${totals.totalDue.toFixed(2)}`
             )}
           </CardContent>
         </Card>
