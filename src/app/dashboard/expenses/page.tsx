@@ -42,7 +42,7 @@ export default function ExpensesPage() {
             <CardTitle>Total Expenses</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
-            ₹{totalExpenses.toLocaleString()}
+            ₹{totalExpenses.toFixed(2)}
           </CardContent>
         </Card>
 
