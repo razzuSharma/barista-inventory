@@ -4,7 +4,6 @@ import { XCircle } from "lucide-react";
 type ErrorMessageProps = {
   error: Error;
 };
-
 const ErrorMessage = ({ error }: ErrorMessageProps) => (
   <div className="bg-red-50 border border-red-200 rounded-xl p-6">
     <div className="flex items-center gap-3">
@@ -16,5 +15,4 @@ const ErrorMessage = ({ error }: ErrorMessageProps) => (
     </div>
   </div>
 );
-
 export default ErrorMessage;
