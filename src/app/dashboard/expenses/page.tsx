@@ -51,6 +51,7 @@ export default function ExpensesPage() {
             <CardTitle>Entries Count</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
+            
             {expenses.length}
           </CardContent>
         </Card>

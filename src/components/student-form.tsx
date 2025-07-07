@@ -36,6 +36,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
   const [courses, setCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -53,9 +54,35 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
     fetchCourses();
   }, []);
 
+  function validateEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+  function validatePhone(phone: string) {
+    return /^\d{10,15}$/.test(phone.replace(/\D/g, ""));
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return; // Prevent if already submitting
+
+    // Client-side validation
+    if (!name || !email || !address || !phone || !shift || !gender || !parentsName || !parentsPhone || !educationLevel) {
+      setFormError("Please fill in all required fields.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+    if (!validatePhone(phone)) {
+      setFormError("Please enter a valid phone number (10-15 digits).");
+      return;
+    }
+    if (!validatePhone(parentsPhone)) {
+      setFormError("Please enter a valid parent's phone number (10-15 digits).");
+      return;
+    }
+    setFormError(null);
     setIsSubmitting(true); // <-- Set submitting true
 
     try {
@@ -79,6 +106,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         .single();
 
       if (studentError || !studentData) {
+        setFormError("Failed to add student. Please try again.");
         console.error("Failed to add student:", studentError);
         return; // Exit early on error
       }
@@ -95,6 +123,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
           .insert(enrollments);
 
         if (enrollmentError) {
+          setFormError("Failed to enroll student in courses. Please try again.");
           console.error(
             "Failed to enroll student in courses:",
             enrollmentError
@@ -123,6 +152,9 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {formError && (
+        <div className="text-red-500 text-sm font-medium mb-2">{formError}</div>
+      )}
       <div className="space-y-2">
         <Label>Name</Label>
         <Input
@@ -206,7 +238,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
         <Select onValueChange={setShift} value={shift}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Choose a shift" />
-          </SelectTrigger>
+          </SelectTrigger>  
           <SelectContent>
             <SelectItem value="8:30 to 10:00">8:30 to 10:00</SelectItem>
             <SelectItem value="11:00 to 12:30">11:00 to 12:30</SelectItem>

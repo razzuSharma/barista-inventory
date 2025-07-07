@@ -1,11 +1,28 @@
-// app/dashboard/layout.tsx
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true); // loading state to prevent flicker
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (!isAuthenticated) {
+      router.replace("/login");
+    } else {
+      setIsLoading(false); // only show content if authenticated
+    }
+  }, [router]);
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
   return (
     <SidebarProvider
       style={
