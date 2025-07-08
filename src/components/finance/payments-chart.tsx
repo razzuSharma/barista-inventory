@@ -20,7 +20,9 @@ ChartJS.register(
   Legend
 );
 
-export function PaymentsChart({ payments }: { payments: any[] }) {
+type Payment = { amount: number; payment_date: string };
+
+export function PaymentsChart({ payments }: { payments: Payment[] }) {
   const grouped = payments.reduce((acc: Record<string, number>, p) => {
     const date = p.payment_date.split("T")[0];
     acc[date] = (acc[date] || 0) + p.amount;

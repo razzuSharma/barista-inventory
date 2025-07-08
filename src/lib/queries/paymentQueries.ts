@@ -10,7 +10,7 @@ import {
 export const paymentsKeys = {
   all: ["payments"] as const,
   lists: () => [...paymentsKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
+  list: (filters: Record<string, unknown>) =>
     [...paymentsKeys.lists(), { filters }] as const,
   details: () => [...paymentsKeys.all, "detail"] as const,
   detail: (id: string) => [...paymentsKeys.details(), id] as const,
@@ -19,7 +19,7 @@ export const paymentsKeys = {
 export const enrollmentsKeys = {
   all: ["enrollments"] as const,
   lists: () => [...enrollmentsKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
+  list: (filters: Record<string, unknown>) =>
     [...enrollmentsKeys.lists(), { filters }] as const,
   details: () => [...enrollmentsKeys.all, "detail"] as const,
   detail: (id: string) => [...enrollmentsKeys.details(), id] as const,

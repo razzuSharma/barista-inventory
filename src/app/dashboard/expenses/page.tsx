@@ -3,12 +3,18 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { IconReceipt } from "@tabler/icons-react";
 import { AddExpenseDialog } from "@/components/expenses/add-expenses-dialog";
 
+export type Expense = {
+  bill_number: React.ReactNode;
+  id: string;
+  amount: number;
+  date: string;
+  source: string;
+};
+
 export default function ExpensesPage() {
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
 
   const fetchExpenses = async () => {
     const { data, error } = await supabase

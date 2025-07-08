@@ -193,7 +193,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Parent's Name</Label>
+        <Label>Parent&apos;s Name</Label>
         <Input
           value={parentsName}
           onChange={(e) => setParentsName(e.target.value)}
@@ -202,7 +202,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Parent's Phone</Label>
+        <Label>Parent&apos;s Phone</Label>
         <Input
           value={parentsPhone}
           onChange={(e) => setParentsPhone(e.target.value)}

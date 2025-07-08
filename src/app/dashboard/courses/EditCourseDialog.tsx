@@ -11,11 +11,20 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/supabase";
 
+// Define a Course type if not already present
+export type Course = {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  price: string;
+};
+
 export function EditCourseDialog({
   course,
   onUpdated,
 }: {
-  course: any;
+  course: Course;
   onUpdated: () => void;
 }) {
   const [form, setForm] = useState(course);

@@ -21,6 +21,9 @@ interface StudentCardProps {
   student: Student & {
     dueAmount: number;
     paymentStatus: "Paid" | "Due" | "Partial";
+    parentsName: string;
+    parentsPhone: string;
+    educationLevel: string;
   };
   onDelete: (student: Student) => void;
 }
@@ -66,8 +69,31 @@ export const StudentCard = ({ student, onDelete }: StudentCardProps) => {
       }
     >
       <div className="flex gap-2">
-        <ViewStudentDialog student={student} />
-        <EditStudentsDialog student={student} onUpdated={() => {}} />
+        <ViewStudentDialog
+          student={{
+            ...student,
+            gender: student.gender ?? "",
+            phone: student.phone ?? "",
+            address: student.address ?? "",
+            parentsName: student.parentsName ?? "",
+            parentsPhone: student.parentsPhone ?? "",
+            educationLevel: student.educationLevel ?? "",
+            shift: student.shift ?? "",
+          }}
+        />
+        <EditStudentsDialog
+          student={{
+            ...student,
+            gender: student.gender ?? "",
+            phone: student.phone ?? "",
+            address: student.address ?? "",
+            parentsName: student.parentsName ?? "",
+            parentsPhone: student.parentsPhone ?? "",
+            educationLevel: student.educationLevel ?? "",
+            shift: student.shift ?? "",
+          }}
+          onUpdated={() => {}}
+        />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive">Delete</Button>

@@ -18,6 +18,23 @@ import {
   MailIcon,
 } from "lucide-react";
 
+type Course = { id: string; name: string; duration?: string };
+type Student = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  parentsName: string;
+  parentsPhone: string;
+  gender: string;
+  shift: string;
+  educationLevel: string;
+  start_date?: string;
+  end_date?: string;
+  courses?: Course[];
+};
+
 function DetailItem({
   label,
   value,
@@ -50,7 +67,7 @@ function CoursePill({ name }: { name: string }) {
   );
 }
 
-const ViewStudentDialog = ({ student }: { student: any }) => {
+const ViewStudentDialog = ({ student }: { student: Student }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -118,7 +135,9 @@ const ViewStudentDialog = ({ student }: { student: any }) => {
                 label="Enrollment Period"
                 value={
                   student.start_date && student.end_date
-                    ? `${new Date(student.start_date).toLocaleDateString()} - ${new Date(
+                    ? `${new Date(
+                        student.start_date
+                      ).toLocaleDateString()} - ${new Date(
                         student.end_date
                       ).toLocaleDateString()}`
                     : "-"
@@ -126,14 +145,14 @@ const ViewStudentDialog = ({ student }: { student: any }) => {
                 icon={<ClockIcon className="w-7 h-7" />}
               />
 
-              {student.courses?.length > 0 && (
+              {student.courses && student.courses.length > 0 && (
                 <div>
                   <h4 className="flex items-center gap-3 text-2xl font-bold text-blue-700 dark:text-blue-400 mb-5 tracking-wide">
                     <ClockIcon className="w-7 h-7" />
                     Course Durations
                   </h4>
                   <div className="flex flex-wrap gap-4">
-                    {student.courses.map((course: any) => (
+                    {student.courses.map((course: Course) => (
                       <span
                         key={course.id}
                         className="bg-gray-100 dark:bg-gray-700 rounded-lg px-5 py-2 text-gray-800 dark:text-gray-300 font-semibold shadow-sm"
@@ -147,14 +166,14 @@ const ViewStudentDialog = ({ student }: { student: any }) => {
             </div>
           </section>
 
-          {student.courses?.length > 0 && (
+          {student.courses && student.courses.length > 0 && (
             <section>
               <h4 className="flex items-center gap-4 text-3xl font-extrabold text-blue-700 dark:text-blue-400 mb-6 tracking-wide">
                 <BookOpenIcon className="w-8 h-8" />
                 Enrolled Courses
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-6">
-                {student.courses.map((course: any) => (
+                {student.courses.map((course: Course) => (
                   <CoursePill key={course.id} name={course.name} />
                 ))}
               </div>

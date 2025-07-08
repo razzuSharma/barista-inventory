@@ -44,7 +44,7 @@ export const useAddInventoryItem = () => {
       if (error) throw new Error(`Failed to add item: ${error.message}`);
       return data as InventoryItem;
     },
-    onMutate: async (newItem) => {
+    onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["inventory"] });
       const previousItems = queryClient.getQueryData<InventoryItem[]>([
         "inventory",

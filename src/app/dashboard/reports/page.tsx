@@ -4,10 +4,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { generatePaymentReport } from "@/lib/supabase/reportHelpers";
+
+type Payment = { amount: number; payment_date: string; discount: number };
+type Report = {
+  payments: Payment[];
+  total_received: number;
+  total_discount: number;
+  total_transactions: number;
+};
+
 export default function ReportSection() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [report, setReport] = useState<any | null>(null);
+  const [report, setReport] = useState<Report | null>(null);
 
   const handleGenerate = async () => {
     if (!startDate || !endDate) {
@@ -49,7 +58,7 @@ export default function ReportSection() {
           <div className="mt-4">
             <h4 className="font-semibold">Payments:</h4>
             <ul className="text-sm list-disc list-inside">
-              {report.payments.map((p: any, index: number) => (
+              {report.payments.map((p: Payment, index: number) => (
                 <li key={index}>
                   ₹{p.amount.toFixed(2)} on {p.payment_date}{" "}
                   {p.discount ? `(Discount: ₹${p.discount.toFixed(2)})` : ""}

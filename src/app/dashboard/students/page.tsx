@@ -7,7 +7,7 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
-  DialogHeader, 
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import StudentForm from "@/components/student-form";
@@ -21,7 +21,9 @@ type PaymentStatus = "Paid" | "Due" | "Partial";
 export default function StudentsPage() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState<PaymentStatus | "all">("all");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentStatus | "all">(
+    "all"
+  );
 
   const {
     paymentStats,
@@ -74,10 +76,7 @@ export default function StudentsPage() {
       />
 
       {/* Students List */}
-      <StudentsList
-        students={filteredStudents}
-        onDelete={deleteStudent}
-      />
+      <StudentsList students={filteredStudents} onDelete={deleteStudent} />
     </div>
   );
 }

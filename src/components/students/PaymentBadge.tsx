@@ -1,4 +1,3 @@
-import { Student } from "@/lib/supabase/studentHelpers";
 type PaymentStatus = "Paid" | "Due" | "Partial";
 
 export const PaymentBadge = ({ status }: { status: PaymentStatus }) => {

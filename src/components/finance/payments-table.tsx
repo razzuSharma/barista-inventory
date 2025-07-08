@@ -12,13 +12,25 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash } from "lucide-react";
 
+type Payment = {
+  id: string;
+  enrollment: {
+    student: { name: string };
+    course: { name: string };
+  };
+  payment_date: string;
+  amount: number;
+  payment_method: string;
+  remarks: string;
+};
+
 export function PaymentsTable({
   payments,
   onEdit,
   onDelete,
 }: {
-  payments: any[];
-  onEdit?: (payment: any) => void;
+  payments: Payment[];
+  onEdit?: (payment: Payment) => void;
   onDelete?: (id: string) => void;
 }) {
   return (
