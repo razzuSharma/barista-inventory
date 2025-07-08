@@ -23,10 +23,11 @@ export default function Home() {
         </h1>
         <p className="mt-4 text-lg md:text-xl text-[#e0cfc1] max-w-2xl drop-shadow-md leading-relaxed">
           Welcome to your one-stop platform to manage everything from student
-          enrollments to course tracking and financial records. Whether you're
-          just starting or already running a successful barista school, we’ve
-          built the tools you need — brewed to perfection.
+          enrollments to course tracking and financial records. Whether
+          you&apos;re just starting or already running a successful barista
+          school, we&apos;ve built the tools you need — brewed to perfection.
         </p>
+
         <p className="mt-6 text-base md:text-lg text-[#d8bfa5] max-w-xl drop-shadow-md">
           Easily record student details, track payments, log income & expenses,
           generate performance reports, and focus on what you love — teaching

@@ -26,8 +26,16 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 
+export type Course = {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  price: string;
+};
+
 const CoursesPage = () => {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",

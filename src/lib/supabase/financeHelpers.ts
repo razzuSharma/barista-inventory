@@ -1,5 +1,17 @@
-
 import { supabase } from "./supabase";
+
+type Payment = {
+  id: string;
+  amount: number;
+  enrollment: {
+    id: string;
+    student: { id: string; name: string };
+    course: { id: string; name: string; price?: number };
+  };
+  payment_date: string;
+  payment_method: string;
+  remarks: string;
+};
 
 export async function fetchPayments() {
   const { data, error } = await supabase
@@ -35,7 +47,7 @@ export async function softDeletePayment(id: string) {
   }
 }
 
-export function calculateTotals(payments: any[]) {
+export function calculateTotals(payments: Payment[]) {
   const totalReceived = payments.reduce((sum, p) => sum + p.amount, 0);
 
   const enrollmentPayments = new Map<string, number>();
@@ -56,10 +68,11 @@ export function calculateTotals(payments: any[]) {
   return {
     totalReceived,
     fullyPaidCount: fullPayments.size,
-    totalDue:
-      [...enrollmentPayments.entries()].reduce((acc, [id, paid]) => {
-        const coursePrice = payments.find(p => p.enrollment.id === id)?.enrollment.course?.price || 0;
-        return acc + Math.max(0, coursePrice - paid);
-      }, 0)
+    totalDue: [...enrollmentPayments.entries()].reduce((acc, [id, paid]) => {
+      const coursePrice =
+        payments.find((p) => p.enrollment.id === id)?.enrollment.course
+          ?.price || 0;
+      return acc + Math.max(0, coursePrice - paid);
+    }, 0),
   };
 }

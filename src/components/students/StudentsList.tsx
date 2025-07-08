@@ -18,7 +18,7 @@ export const StudentsList = ({ students, onDelete }: StudentsListProps) => {
           students.map((student) => (
             <StudentCard
               key={student.id}
-              student={student}
+              student={student as unknown as Student & { dueAmount: number; paymentStatus: "Paid" | "Due" | "Partial"; parentsName: string; parentsPhone: string; educationLevel: string; }}
               onDelete={onDelete}
             />
           ))

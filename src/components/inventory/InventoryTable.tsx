@@ -1,5 +1,5 @@
 import React from "react";
-import { Package, XCircle, AlertTriangle } from "lucide-react";
+import { Package  } from "lucide-react";
 import { UseMutationResult } from "@tanstack/react-query";
 import type { InventoryItem } from "@/types/inventory";
 

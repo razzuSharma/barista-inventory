@@ -16,12 +16,24 @@ import { IconMan } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
+// Define Payment type locally for mapping
+type Payment = {
+  id: string;
+  enrollment: {
+    student: { name: string };
+    course: { name: string };
+  };
+  payment_date: string;
+  amount: number;
+  payment_method: string;
+  remarks: string;
+};
+
 export default function PaymentsPage() {
   const [editingPayment, setEditingPayment] = useState<PaymentData | null>(
     null
   );
 
-  // TanStack Query hooks
   const {
     data: payments = [],
     isLoading,
@@ -48,8 +60,8 @@ export default function PaymentsPage() {
     }
   };
 
-  const handleEdit = (payment: PaymentData) => {
-    setEditingPayment(payment);
+  const handleEdit = (payment: Payment) => {
+    setEditingPayment(payment as unknown as PaymentData);
   };
 
   const handleEditClose = () => {
@@ -59,6 +71,18 @@ export default function PaymentsPage() {
   const handleRefresh = () => {
     refetch();
   };
+
+  // Map PaymentData[] to Payment[] for type compatibility
+  const mappedPayments = payments.map((p: PaymentData) => ({
+    ...p,
+    payment_method: (p as unknown as Payment).payment_method?.toString() ?? "",
+    enrollment: {
+      ...p.enrollment,
+      student: p.enrollment?.student ?? { name: "" },
+      course: p.enrollment?.course ?? { name: "" },
+    },
+    remarks: p.remarks ?? "",
+  }));
 
   // Error state
   if (error) {
@@ -157,9 +181,9 @@ export default function PaymentsPage() {
         </div>
       ) : (
         <>
-          <PaymentsChart payments={payments} />
+          <PaymentsChart payments={mappedPayments} />
           <PaymentsTable
-            payments={payments}
+            payments={mappedPayments}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

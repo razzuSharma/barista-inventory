@@ -16,16 +16,33 @@ import { supabase } from "@/lib/supabase/supabase";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 
-interface Course {
+type Student = {
   id: string;
   name: string;
-}
+  email: string;
+  address: string;
+  phone: string;
+  gender: string;
+  shift: string;
+  parentsName: string;
+  parentsPhone: string;
+  educationLevel: string;
+  start_date?: string;
+  end_date?: string;
+  courses?: { id: string; name: string; duration?: string }[];
+};
+
+type Course = {
+  id: string;
+  name: string;
+  duration?: string;
+};
 
 const EditStudentsDialog = ({
   student,
   onUpdated,
 }: {
-  student: any;
+  student: Student;
   onUpdated: () => void;
 }) => {
   // Initialize form with student data, selectedCourses as empty array initially
