@@ -3,7 +3,10 @@ import { Student } from "@/lib/supabase/studentHelpers";
 import { StudentCard } from "./StudentCard";
 
 interface StudentsListProps {
-  students: (Student & { dueAmount: number; paymentStatus: "Paid" | "Due" | "Partial" })[];
+  students: (Student & {
+    dueAmount: number;
+    paymentStatus: "Paid" | "Due" | "Partial";
+  })[];
   onDelete: (student: Student) => void;
 }
 
@@ -18,14 +21,20 @@ export const StudentsList = ({ students, onDelete }: StudentsListProps) => {
           students.map((student) => (
             <StudentCard
               key={student.id}
-              student={student as unknown as Student & { dueAmount: number; paymentStatus: "Paid" | "Due" | "Partial"; parentsName: string; parentsPhone: string; educationLevel: string; }}
+              student={
+                student as unknown as Student & {
+                  dueAmount: number;
+                  paymentStatus: "Paid" | "Due" | "Partial";
+                  parentsName: string;
+                  parentsPhone: string;
+                  educationLevel: string;
+                }
+              }
               onDelete={onDelete}
             />
           ))
         ) : (
-          <p className="text-muted-foreground">
-            No enrolled students found.
-          </p>
+          <p className="text-muted-foreground">No enrolled students found.</p>
         )}
       </div>
     </div>

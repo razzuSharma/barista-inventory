@@ -9,6 +9,7 @@ import {
   IconMan,
   IconMoneybag,
   IconBook,
+  IconMoneybagHeart,
 } from "@tabler/icons-react";
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
@@ -46,14 +47,14 @@ const data = {
       icon: IconBook,
     },
     {
-      title: "Finance",
+      title: "Income",
       url: "/dashboard/finance",
-      icon: IconMoneybag,
+      icon: IconMoneybagHeart,
     },
     {
       title: "Expenses",
       url: "/dashboard/expenses",
-      icon: IconReport,
+      icon: IconMoneybag,
     },
   ],
   navClouds: [

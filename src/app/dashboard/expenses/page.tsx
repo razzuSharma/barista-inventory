@@ -4,6 +4,20 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddExpenseDialog } from "@/components/expenses/add-expenses-dialog";
+import { EditExpenseDialog } from "@/components/expenses/edit-expenses-dialog";
+import { Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export type Expense = {
   bill_number: React.ReactNode;
@@ -57,7 +71,6 @@ export default function ExpensesPage() {
             <CardTitle>Entries Count</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
-            
             {expenses.length}
           </CardContent>
         </Card>
@@ -81,6 +94,7 @@ export default function ExpensesPage() {
               <th className="px-4 py-2 text-left">Source</th>
               <th className="px-4 py-2 text-left">Amount (₹)</th>
               <th className="px-4 py-2 text-left">Bill Number</th>
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -93,6 +107,36 @@ export default function ExpensesPage() {
                 <td className="px-4 py-2">{exp.source}</td>
                 <td className="px-4 py-2">₹{exp.amount}</td>
                 <td className="px-4 py-2">{exp.bill_number}</td>
+                <td className="px-4 py-2 flex gap-2">
+                  <EditExpenseDialog expense={exp} onExpenseUpdated={fetchExpenses} />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="icon" variant="destructive" title="Delete Expense">
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-red-500">Delete Expense?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this expense? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={async () => {
+                            const { error } = await supabase.from('expenses').delete().eq('id', exp.id);
+                            if (!error) fetchExpenses();
+                            else alert('Failed to delete expense.');
+                          }}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </td>
               </tr>
             ))}
             {expenses.length === 0 && (
