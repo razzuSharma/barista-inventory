@@ -66,7 +66,17 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
     if (isSubmitting) return; // Prevent if already submitting
 
     // Client-side validation
-    if (!name || !email || !address || !phone || !shift || !gender || !parentsName || !parentsPhone || !educationLevel) {
+    if (
+      !name ||
+      !email ||
+      !address ||
+      !phone ||
+      !shift ||
+      !gender ||
+      !parentsName ||
+      !parentsPhone ||
+      !educationLevel
+    ) {
       setFormError("Please fill in all required fields.");
       return;
     }
@@ -79,7 +89,9 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
       return;
     }
     if (!validatePhone(parentsPhone)) {
-      setFormError("Please enter a valid parent's phone number (10-15 digits).");
+      setFormError(
+        "Please enter a valid parent's phone number (10-15 digits)."
+      );
       return;
     }
     setFormError(null);
@@ -123,7 +135,9 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
           .insert(enrollments);
 
         if (enrollmentError) {
-          setFormError("Failed to enroll student in courses. Please try again.");
+          setFormError(
+            "Failed to enroll student in courses. Please try again."
+          );
           console.error(
             "Failed to enroll student in courses:",
             enrollmentError
@@ -170,7 +184,6 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
       </div>
 
@@ -235,16 +248,12 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
 
       <div className="space-y-2">
         <Label>Shift</Label>
-        <Select onValueChange={setShift} value={shift}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Choose a shift" />
-          </SelectTrigger>  
-          <SelectContent>
-            <SelectItem value="8:30 to 10:00">8:30 to 10:00</SelectItem>
-            <SelectItem value="11:00 to 12:30">11:00 to 12:30</SelectItem>
-            <SelectItem value="12:30 to 2:00">12:30 to 2:00</SelectItem>
-          </SelectContent>
-        </Select>
+        <Input
+          value={shift}
+          onChange={(e) => setShift(e.target.value)}
+          placeholder="Enter shift (e.g., 8:30 to 10:00)"
+          required
+        />
       </div>
 
       <div className="space-y-2">

@@ -24,3 +24,25 @@ export async function generatePaymentReport(startDate: string, endDate: string) 
     payments: data,
   };
 }
+
+export async function generateExpenseReport(startDate: string, endDate: string) {
+  const { data, error } = await supabase
+    .from("expenses")
+    .select("amount, date")
+    .gte("date", startDate)
+    .lte("date", endDate);
+
+  if (error) {
+    console.error("Expense report fetch error", error);
+    return null;
+  }
+
+  const totalExpense = data.reduce((sum, e) => sum + (e.amount || 0), 0);
+  const totalTransactions = data.length;
+
+  return {
+    total_expense: totalExpense,
+    total_transactions: totalTransactions,
+    expenses: data,
+  };
+}
