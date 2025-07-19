@@ -84,6 +84,9 @@ export default function PaymentsPage() {
     remarks: p.remarks ?? "",
   }));
 
+  // Calculate Active Payers (unique students who have made at least one payment)
+  const activePayers = new Set(payments.map((p: PaymentData) => p.enrollment?.student?.id)).size;
+
   // Error state
   if (error) {
     return (
@@ -153,14 +156,14 @@ export default function PaymentsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Total Cleared</CardTitle>
+            <CardTitle>Active Payers</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold flex items-center">
             <IconMan />
             {totalsLoading ? (
               <div className="animate-pulse bg-gray-200 h-8 w-16 rounded ml-2"></div>
             ) : (
-              <p className="px-2">{totals.fullyPaidCount}</p>
+              <p className="px-2">{activePayers}</p>
             )}
           </CardContent>
         </Card>
