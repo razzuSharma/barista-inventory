@@ -68,7 +68,6 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
     // Client-side validation
     if (
       !name ||
-      !email ||
       !address ||
       !phone ||
       !shift ||
@@ -80,7 +79,7 @@ export default function StudentForm({ onSubmit }: StudentFormProps) {
       setFormError("Please fill in all required fields.");
       return;
     }
-    if (!validateEmail(email)) {
+    if (email && !validateEmail(email)) {
       setFormError("Please enter a valid email address.");
       return;
     }
